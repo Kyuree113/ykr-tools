@@ -1,0 +1,162 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>학원 차량 진단 — 계산기 & 결정 체크리스트 | 연규리에듀클리닉</title>
+<style>
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body {
+    font-family: 'Pretendard', -apple-system, BlinkMacSystemFont, 'Malgun Gothic', sans-serif;
+    background: #F0FAF6; color: #2c2c2c; min-height: 100vh;
+    display: flex; align-items: flex-start; justify-content: center; padding: 24px 16px;
+  }
+  .wrap { width: 100%; max-width: 500px; }
+  .card { background: #fff; border-radius: 20px; padding: 28px 26px; margin-bottom: 18px; box-shadow: 0 4px 24px rgba(15,110,86,0.08); }
+  .hd { display: flex; align-items: center; gap: 9px; margin-bottom: 3px; }
+  .hd-icon { font-size: 21px; }
+  .title { font-size: 19px; font-weight: 700; color: #0F6E56; }
+  .sub { font-size: 12.5px; color: #888; margin-bottom: 22px; }
+  .fld { margin-bottom: 13px; }
+  .fld label { display: block; font-size: 13px; color: #555; margin-bottom: 5px; }
+  .fld .hint { font-size: 11px; color: #aaa; margin-top: 4px; line-height: 1.4; }
+  .inwrap { position: relative; }
+  .inwrap input {
+    width: 100%; padding: 11px 52px 11px 13px; font-size: 15px;
+    border: 1.5px solid #d8e6e0; border-radius: 10px; background: #fff;
+    color: #2c2c2c; font-family: inherit; outline: none; transition: border-color .2s;
+  }
+  .inwrap input:focus { border-color: #1D9E75; }
+  .inwrap .unit { position: absolute; right: 13px; top: 50%; transform: translateY(-50%); font-size: 12.5px; color: #aaa; }
+  .results { margin-top: 18px; display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
+  .rcard { background: #f3f3f0; border-radius: 11px; padding: 14px; text-align: center; }
+  .rc-label { font-size: 11px; color: #777; margin-bottom: 3px; }
+  .rc-val { font-size: 25px; font-weight: 700; color: #2c2c2c; }
+  .rc-unit { font-size: 11.5px; color: #aaa; }
+  .verdict { margin-top: 11px; padding: 16px; border-radius: 12px; text-align: center; background: #f3f3f0; transition: background .3s; }
+  .verdict.ok { background: #E1F5EE; } .verdict.danger { background: #FCEBEB; }
+  .v-main { font-size: 16px; font-weight: 600; color: #888; }
+  .verdict.ok .v-main { color: #0F6E56; } .verdict.danger .v-main { color: #A32D2D; }
+  .v-sub { font-size: 12.5px; margin-top: 3px; color: #aaa; }
+  .verdict.ok .v-sub { color: #0F6E56; } .verdict.danger .v-sub { color: #A32D2D; }
+  .grp-label { font-size: 12.5px; font-weight: 600; margin: 18px 0 8px; display: flex; align-items: center; gap: 6px; }
+  .grp-keep { color: #0F6E56; } .grp-recon { color: #854F0B; }
+  .item {
+    display: flex; align-items: flex-start; gap: 10px; padding: 11px 13px;
+    border: 1.5px solid #eee; border-radius: 10px; margin-bottom: 7px; cursor: pointer;
+    background: #fff; transition: background .15s, border-color .15s;
+  }
+  .item.on.keep { background: #E1F5EE; border-color: #5DCAA5; }
+  .item.on.recon { background: #FAEEDA; border-color: #EF9F27; }
+  .cb { width: 19px; height: 19px; border: 1.5px solid #ccc; border-radius: 5px; flex-shrink: 0; margin-top: 1px; display: flex; align-items: center; justify-content: center; }
+  .item.on.keep .cb { background: #1D9E75; border-color: #1D9E75; }
+  .item.on.recon .cb { background: #EF9F27; border-color: #EF9F27; }
+  .cb svg { width: 12px; height: 12px; display: none; }
+  .item.on .cb svg { display: block; }
+  .item-txt { font-size: 13.5px; color: #2c2c2c; line-height: 1.4; }
+  .advice { margin-top: 18px; padding: 18px; border-radius: 12px; background: #f3f3f0; transition: background .3s; }
+  .advice.keep { background: #E1F5EE; } .advice.adjust { background: #FAEEDA; } .advice.cut { background: #FCEBEB; }
+  .adv-tag { font-size: 12px; font-weight: 600; margin-bottom: 5px; color: #888; }
+  .advice.keep .adv-tag { color: #0F6E56; } .advice.adjust .adv-tag { color: #854F0B; } .advice.cut .adv-tag { color: #A32D2D; }
+  .adv-main { font-size: 16px; font-weight: 600; line-height: 1.4; color: #2c2c2c; }
+  .advice.keep .adv-main { color: #0F6E56; } .advice.adjust .adv-main { color: #854F0B; } .advice.cut .adv-main { color: #A32D2D; }
+  .adv-sub { font-size: 13px; color: #666; margin-top: 7px; line-height: 1.55; }
+  .note { font-size: 11.5px; color: #aaa; line-height: 1.5; margin-top: 16px; padding: 10px 12px; background: #f7f7f5; border-radius: 8px; }
+  .cta { margin-top: 18px; padding: 15px 18px; background: #0F6E56; border-radius: 12px; display: flex; align-items: center; justify-content: space-between; gap: 10px; cursor: pointer; text-decoration: none; transition: background .2s; }
+  .cta:hover { background: #0c5a47; }
+  .cta-txt { font-size: 13.5px; color: #fff; line-height: 1.4; }
+  .cta-txt b { color: #9FE1CB; font-weight: 600; }
+  .cta-arrow { font-size: 20px; color: #9FE1CB; }
+  .wordmark { text-align: center; font-size: 12px; color: #aaa; margin-top: 16px; }
+  .wordmark .y { color: #0F6E56; font-weight: 700; } .wordmark .d { color: #5DCAA5; }
+</style>
+</head>
+<body>
+<div class="wrap">
+
+  <div class="card">
+    <div class="hd"><span class="hd-icon">🚌</span><span class="title">학원 차량 손익분기 계산기</span></div>
+    <div class="sub">우리 차, 몇 명이 타야 본전인지 계산해보세요</div>
+
+    <div class="fld">
+      <label>월 차량 운영비</label>
+      <div class="inwrap"><input type="number" id="cost" placeholder="예: 400" inputmode="numeric"><span class="unit">만 원</span></div>
+      <div class="hint">기사 인건비 + 리스·할부 + 유류 + 보험 + 정비 + 세금 전부 합산</div>
+    </div>
+    <div class="fld">
+      <label>현재 차량 이용 학생 수</label>
+      <div class="inwrap"><input type="number" id="num" placeholder="예: 20" inputmode="numeric"><span class="unit">명</span></div>
+    </div>
+    <div class="fld">
+      <label>차량 이용 학생 1명당 월 순이익</label>
+      <div class="inwrap"><input type="number" id="profit" placeholder="예: 18" inputmode="numeric"><span class="unit">만 원</span></div>
+      <div class="hint">원비에서 그 학생 몫의 강사비·교재비 등을 뺀 금액 (보통 원비의 40~60%)</div>
+    </div>
+
+    <div class="results">
+      <div class="rcard"><div class="rc-label">학생 1명당 차량비</div><div class="rc-val" id="perStudent">—</div><div class="rc-unit">만 원 / 명</div></div>
+      <div class="rcard"><div class="rc-label">손익분기 인원</div><div class="rc-val" id="breakeven">—</div><div class="rc-unit">명 이상</div></div>
+    </div>
+    <div class="verdict" id="verdict"><div class="v-main" id="vMain">숫자를 입력해보세요</div><div class="v-sub" id="vSub"></div></div>
+    <div class="note">위 결과는 참고용이에요. 차량비는 매출의 몇 %로 보기 어렵고 학원마다 편차가 커서, 학생 1명당 비용과 손익분기 인원으로 보는 게 정확합니다.</div>
+  </div>
+
+  <div class="card">
+    <div class="hd"><span class="hd-icon">📋</span><span class="title">차량 유지, 어떻게 결정할까</span></div>
+    <div class="sub">우리 학원에 해당하는 항목을 체크하세요</div>
+
+    <div class="grp-label grp-keep">✓ 유지에 유리한 신호</div>
+    <div class="item keep" onclick="tog(this)"><div class="cb"><svg viewBox="0 0 12 12"><path d="M2 6 L5 9 L10 3" fill="none" stroke="#fff" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg></div><div class="item-txt">차량 이용 학생이 손익분기 인원 이상이다</div></div>
+    <div class="item keep" onclick="tog(this)"><div class="cb"><svg viewBox="0 0 12 12"><path d="M2 6 L5 9 L10 3" fill="none" stroke="#fff" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg></div><div class="item-txt">차량 이용 학생의 3분의 1 이상이, 차가 없으면 그만둘 것 같다</div></div>
+    <div class="item keep" onclick="tog(this)"><div class="cb"><svg viewBox="0 0 12 12"><path d="M2 6 L5 9 L10 3" fill="none" stroke="#fff" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg></div><div class="item-txt">도보·대중교통으로 오기 어려운 입지다</div></div>
+    <div class="item keep" onclick="tog(this)"><div class="cb"><svg viewBox="0 0 12 12"><path d="M2 6 L5 9 L10 3" fill="none" stroke="#fff" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg></div><div class="item-txt">경쟁 학원 대부분이 차량을 운영한다</div></div>
+
+    <div class="grp-label grp-recon">⚠ 재검토가 필요한 신호</div>
+    <div class="item recon" onclick="tog(this)"><div class="cb"><svg viewBox="0 0 12 12"><path d="M2 6 L5 9 L10 3" fill="none" stroke="#fff" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg></div><div class="item-txt">빈 좌석으로 도는 노선이 있다</div></div>
+    <div class="item recon" onclick="tog(this)"><div class="cb"><svg viewBox="0 0 12 12"><path d="M2 6 L5 9 L10 3" fill="none" stroke="#fff" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg></div><div class="item-txt">차량비가 매출의 10%를 넘는다</div></div>
+    <div class="item recon" onclick="tog(this)"><div class="cb"><svg viewBox="0 0 12 12"><path d="M2 6 L5 9 L10 3" fill="none" stroke="#fff" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg></div><div class="item-txt">차량비를 원비에 전혀 반영하지 못한다</div></div>
+
+    <div class="advice" id="advice"><div class="adv-tag" id="advTag">결과</div><div class="adv-main" id="advMain">항목을 체크하면 조언이 나와요</div><div class="adv-sub" id="advSub"></div></div>
+  </div>
+
+  <a class="cta" href="#" id="ctaLink">
+    <span class="cta-txt">노선별 정확한 진단은 <b>연규리에듀클리닉 경영 셀프진단</b>에서</span>
+    <span class="cta-arrow">→</span>
+  </a>
+  <div class="wordmark">연규리에듀클리닉 · <span class="y">YKR</span> edu<span class="d">·</span>clinic</div>
+</div>
+
+<script>
+  function calc() {
+    var cost = parseFloat(document.getElementById('cost').value) || 0;
+    var num = parseFloat(document.getElementById('num').value) || 0;
+    var profit = parseFloat(document.getElementById('profit').value) || 0;
+    var psEl = document.getElementById('perStudent'), beEl = document.getElementById('breakeven');
+    var box = document.getElementById('verdict'), vM = document.getElementById('vMain'), vS = document.getElementById('vSub');
+    if (cost <= 0) { psEl.textContent='—'; beEl.textContent='—'; vM.textContent='숫자를 입력해보세요'; vS.textContent=''; box.className='verdict'; return; }
+    psEl.textContent = num>0 ? (Math.round(cost/num*10)/10) : '—';
+    if (profit>0) {
+      var be = Math.ceil(cost/profit); beEl.textContent = be;
+      if (num>0) {
+        var diff = num-be;
+        if (diff>=0) { box.className='verdict ok'; vM.textContent='흑자 — 본전을 넘었습니다'; vS.textContent='손익분기보다 '+diff+'명 더 타고 있어요'; }
+        else { box.className='verdict danger'; vM.textContent='적자 — 굴릴수록 손해입니다'; vS.textContent='본전까지 '+Math.abs(diff)+'명이 부족해요'; }
+      } else { box.className='verdict'; vM.textContent='이용 학생 수를 입력해보세요'; vS.textContent=''; }
+    } else { beEl.textContent='—'; box.className='verdict'; vM.textContent='1명당 순이익을 입력해보세요'; vS.textContent=''; }
+  }
+  ['cost','num','profit'].forEach(function(id){ document.getElementById(id).addEventListener('input', calc); });
+
+  function tog(el){ el.classList.toggle('on'); update(); }
+  function update(){
+    var keep = document.querySelectorAll('.item.keep.on').length;
+    var recon = document.querySelectorAll('.item.recon.on').length;
+    var box = document.getElementById('advice'), tag = document.getElementById('advTag'), main = document.getElementById('advMain'), sub = document.getElementById('advSub');
+    if (keep===0 && recon===0) { box.className='advice'; tag.textContent='결과'; main.textContent='항목을 체크하면 조언이 나와요'; sub.textContent=''; return; }
+    if (keep>recon) { box.className='advice keep'; tag.textContent='유지가 합리적입니다'; main.textContent='지금 구조에서는 차량을 유지하는 게 맞아요'; sub.textContent='다만 손익분기 인원은 주기적으로 점검하세요. 이용 학생이 줄면 가장 먼저 적자로 돌아서는 항목입니다.'; }
+    else if (keep<recon) { box.className='advice cut'; tag.textContent='축소·폐지를 검토하세요'; main.textContent='지금은 차량이 수익을 갉아먹고 있을 가능성이 큽니다'; sub.textContent='무작정 없애기보다, 적자 노선부터 정리하거나 차량비를 원비에 반영하는 방안을 먼저 따져보세요. 정확한 계산이 우선입니다.'; }
+    else { box.className='advice adjust'; tag.textContent='노선 조정을 검토하세요'; main.textContent='유지와 부담이 팽팽한 상태예요'; sub.textContent='전체를 유지하거나 없애기보다, 노선별로 손익분기를 따져 흑자 노선만 남기는 조정이 현실적입니다.'; }
+  }
+  document.getElementById('ctaLink').addEventListener('click', function(e){ e.preventDefault(); alert('여기에 경영 셀프진단 도구 링크를 연결하세요.\n(Netlify 배포 후 실제 URL로 교체)'); });
+</script>
+</body>
+</html>
