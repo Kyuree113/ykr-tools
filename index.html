@@ -1,0 +1,160 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>강사비 비율 자동계산기 | 연규리에듀클리닉</title>
+<style>
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body {
+    font-family: 'Pretendard', -apple-system, BlinkMacSystemFont, 'Malgun Gothic', sans-serif;
+    background: #F0FAF6;
+    color: #2c2c2c;
+    min-height: 100vh;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 20px;
+  }
+  .calc {
+    width: 100%;
+    max-width: 480px;
+    background: #fff;
+    border-radius: 20px;
+    padding: 32px 28px;
+    box-shadow: 0 4px 24px rgba(15,110,86,0.08);
+  }
+  .hd { display: flex; align-items: center; gap: 9px; margin-bottom: 4px; }
+  .hd-icon { font-size: 22px; }
+  .title { font-size: 20px; font-weight: 700; color: #0F6E56; }
+  .sub { font-size: 13px; color: #888; margin-bottom: 24px; }
+  .fld { margin-bottom: 14px; }
+  .fld label { display: block; font-size: 13.5px; color: #555; margin-bottom: 6px; }
+  .inwrap { position: relative; }
+  .inwrap input {
+    width: 100%; padding: 12px 56px 12px 14px; font-size: 16px;
+    border: 1.5px solid #d8e6e0; border-radius: 10px; background: #fff;
+    color: #2c2c2c; font-family: inherit; outline: none; transition: border-color .2s;
+  }
+  .inwrap input:focus { border-color: #1D9E75; }
+  .inwrap .unit { position: absolute; right: 14px; top: 50%; transform: translateY(-50%); font-size: 13px; color: #aaa; }
+  .result {
+    margin-top: 22px; padding: 22px; border-radius: 14px; text-align: center;
+    background: #f3f3f0; transition: background .3s;
+  }
+  .result.ok { background: #E1F5EE; }
+  .result.warn { background: #FAEEDA; }
+  .result.danger { background: #FCEBEB; }
+  .r-label { font-size: 12.5px; color: #777; margin-bottom: 2px; }
+  .r-pct { font-size: 50px; font-weight: 700; line-height: 1.1; color: #888; }
+  .result.ok .r-pct { color: #0F6E56; }
+  .result.warn .r-pct { color: #854F0B; }
+  .result.danger .r-pct { color: #A32D2D; }
+  .r-verdict { font-size: 15px; font-weight: 600; margin-top: 4px; color: #888; }
+  .result.ok .r-verdict { color: #0F6E56; }
+  .result.warn .r-verdict { color: #854F0B; }
+  .result.danger .r-verdict { color: #A32D2D; }
+  .gauge { margin-top: 16px; height: 11px; background: #fff; border-radius: 6px; overflow: hidden; }
+  .gauge-fill { height: 11px; border-radius: 6px; width: 0%; background: #ccc; transition: width .35s, background .3s; }
+  .gauge-marks { display: flex; justify-content: space-between; font-size: 10.5px; color: #aaa; margin-top: 5px; }
+  .note { font-size: 11.5px; color: #aaa; line-height: 1.5; margin-top: 16px; padding: 10px 12px; background: #f7f7f5; border-radius: 8px; }
+  .cta {
+    margin-top: 18px; padding: 15px 18px; background: #0F6E56; border-radius: 12px;
+    display: flex; align-items: center; justify-content: space-between; gap: 10px;
+    cursor: pointer; text-decoration: none; transition: background .2s;
+  }
+  .cta:hover { background: #0c5a47; }
+  .cta-txt { font-size: 13.5px; color: #fff; line-height: 1.4; }
+  .cta-txt b { color: #9FE1CB; font-weight: 600; }
+  .cta-arrow { font-size: 20px; color: #9FE1CB; }
+  .wordmark { text-align: center; font-size: 12px; color: #aaa; margin-top: 18px; }
+  .wordmark .y { color: #0F6E56; font-weight: 700; }
+  .wordmark .d { color: #5DCAA5; }
+</style>
+</head>
+<body>
+<div class="calc">
+  <div class="hd">
+    <span class="hd-icon">🧮</span>
+    <span class="title">강사비 비율 자동계산기</span>
+  </div>
+  <div class="sub">보조강사·채점알바까지 포함해서 입력하세요</div>
+
+  <div class="fld">
+    <label>월 매출</label>
+    <div class="inwrap"><input type="number" id="rev" placeholder="예: 1500" inputmode="numeric"><span class="unit">만 원</span></div>
+  </div>
+  <div class="fld">
+    <label>정규강사 급여 합계 (4대 보험 포함)</label>
+    <div class="inwrap"><input type="number" id="reg" placeholder="예: 500" inputmode="numeric"><span class="unit">만 원</span></div>
+  </div>
+  <div class="fld">
+    <label>보조강사·채점알바 급여 합계</label>
+    <div class="inwrap"><input type="number" id="asst" placeholder="예: 100" inputmode="numeric"><span class="unit">만 원</span></div>
+  </div>
+
+  <div class="result" id="result">
+    <div class="r-label">강사비 비율</div>
+    <div class="r-pct" id="pct">—</div>
+    <div class="r-verdict" id="verdict">숫자를 입력해보세요</div>
+    <div class="gauge"><div class="gauge-fill" id="gfill"></div></div>
+    <div class="gauge-marks"><span>0%</span><span>42%</span><span>52%</span><span>70%+</span></div>
+  </div>
+
+  <div class="note">
+    적정 범위는 보조강사 포함 35~42%예요. 위 결과는 참고용이며, 학원 규모·지역·운영 방식에 따라 적정선은 달라질 수 있어요.
+  </div>
+
+  <a class="cta" href="#" id="ctaLink">
+    <span class="cta-txt">더 정확한 진단은 <b>연규리에듀클리닉 경영 셀프진단</b>에서</span>
+    <span class="cta-arrow">→</span>
+  </a>
+
+  <div class="wordmark">연규리에듀클리닉 · <span class="y">YKR</span> edu<span class="d">·</span>clinic</div>
+</div>
+
+<script>
+  function calc() {
+    var rev = parseFloat(document.getElementById('rev').value) || 0;
+    var reg = parseFloat(document.getElementById('reg').value) || 0;
+    var asst = parseFloat(document.getElementById('asst').value) || 0;
+    var box = document.getElementById('result');
+    var pctEl = document.getElementById('pct');
+    var vEl = document.getElementById('verdict');
+    var gf = document.getElementById('gfill');
+    if (rev <= 0) {
+      pctEl.textContent = '—';
+      vEl.textContent = '월 매출을 입력해보세요';
+      box.className = 'result';
+      gf.style.width = '0%';
+      gf.style.background = '#ccc';
+      return;
+    }
+    var ratio = (reg + asst) / rev * 100;
+    var r = Math.round(ratio * 10) / 10;
+    pctEl.textContent = r + '%';
+    gf.style.width = Math.min(ratio / 70 * 100, 100) + '%';
+    if (ratio <= 42) {
+      box.className = 'result ok';
+      vEl.textContent = '건강한 범위입니다';
+      gf.style.background = '#1D9E75';
+    } else if (ratio <= 52) {
+      box.className = 'result warn';
+      vEl.textContent = '점검이 필요한 구간입니다';
+      gf.style.background = '#EF9F27';
+    } else {
+      box.className = 'result danger';
+      vEl.textContent = '위험 — 지금 당장 점검하세요';
+      gf.style.background = '#E24B4A';
+    }
+  }
+  ['rev', 'reg', 'asst'].forEach(function(id) {
+    document.getElementById(id).addEventListener('input', calc);
+  });
+  document.getElementById('ctaLink').addEventListener('click', function(e) {
+    e.preventDefault();
+    alert('여기에 경영 셀프진단 도구 링크를 연결하세요.\n(Netlify 배포 후 실제 URL로 교체)');
+  });
+</script>
+</body>
+</html>
