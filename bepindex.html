@@ -1,0 +1,175 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>학원 손익분기 계산기 | 연규리에듀클리닉</title>
+<meta name="description" content="우리 학원 손익분기 원생 수를 간단히 계산해보세요. 연규리에듀클리닉 학원 경영 클리닉.">
+<style>
+  :root{
+    --ykr:#0F6E56; --ykr-dark:#0a503f; --ykr-mid:#2d8a6e; --ykr-soft:#e6f2ed; --ykr-soft2:#f0f7f3;
+    --ivory:#f7f5f0; --ink:#16271d; --mid:#4a5568; --light:#7b8794; --line:#e3e0d8;
+    --warn-bg:#fef7c7; --warn-tx:#a16207; --warn-ac:#d4a017;
+    --radius:14px; --radius-sm:9px; --shadow:0 2px 14px rgba(15,110,86,0.08);
+  }
+  *{box-sizing:border-box;margin:0;padding:0}
+  body{background:var(--ivory);color:var(--ink);font-family:'Noto Sans KR',sans-serif;font-size:14px;line-height:1.65;-webkit-font-smoothing:antialiased;min-height:100vh}
+  .wrap{max-width:480px;margin:0 auto;padding:0 16px 40px}
+  .top{background:linear-gradient(160deg,var(--ykr) 0%,var(--ykr-dark) 100%);color:#fff;padding:30px 20px 26px;text-align:center;border-radius:0 0 24px 24px;box-shadow:0 6px 22px rgba(15,110,86,0.18);position:relative;overflow:hidden}
+  .top::after{content:"";position:absolute;right:-40px;top:-40px;width:160px;height:160px;background:radial-gradient(circle,rgba(255,255,255,0.10),transparent 70%)}
+  .brand{font-size:11px;letter-spacing:2px;font-weight:500;opacity:.82;margin-bottom:8px;text-transform:uppercase}
+  .top h1{font-size:21px;font-weight:700;line-height:1.4;margin-bottom:7px}
+  .top p{font-size:12.5px;opacity:.9;font-weight:300}
+  .card{background:#fff;border-radius:var(--radius);box-shadow:var(--shadow);padding:20px;margin-top:16px}
+  .card-title{font-size:15px;font-weight:700;color:var(--ykr-dark);margin-bottom:14px;padding-bottom:10px;border-bottom:2px solid var(--ykr-soft);display:flex;align-items:center;gap:8px}
+  .card-title .n{background:var(--ykr);color:#fff;width:22px;height:22px;border-radius:6px;font-size:12px;font-weight:700;display:inline-flex;align-items:center;justify-content:center;flex:0 0 auto}
+  .intro{font-size:13px;color:var(--mid);line-height:1.75}
+  .intro b{color:var(--ykr-dark)}
+  .note-line{margin-top:12px;background:var(--ykr-soft2);border-left:3px solid var(--ykr-mid);border-radius:0 8px 8px 0;padding:10px 13px;font-size:12px;color:var(--ykr-dark);line-height:1.7}
+  .field{margin-bottom:15px}
+  .field:last-child{margin-bottom:0}
+  label.lbl{font-size:12.5px;font-weight:600;color:var(--mid);margin-bottom:6px;display:block}
+  label.lbl .sub{font-weight:400;color:var(--light);font-size:11px;margin-left:3px}
+  .inp-row{position:relative}
+  input[type=number]{width:100%;padding:11px 44px 11px 13px;border:1.5px solid #d8dde0;border-radius:var(--radius-sm);font-size:15px;font-family:'Noto Sans KR';color:var(--ink);background:#fff;transition:border .2s,box-shadow .2s;outline:none;-moz-appearance:textfield}
+  input[type=number]::-webkit-outer-spin-button,input[type=number]::-webkit-inner-spin-button{-webkit-appearance:none;margin:0}
+  input[type=number]:focus{border-color:var(--ykr-mid);box-shadow:0 0 0 3px rgba(15,110,86,0.12)}
+  .unit{position:absolute;right:13px;top:50%;transform:translateY(-50%);font-size:12px;color:var(--light);pointer-events:none}
+  .btn{width:100%;background:var(--ykr);color:#fff;border:none;border-radius:var(--radius-sm);padding:14px;font-size:14.5px;font-weight:700;font-family:'Noto Sans KR';cursor:pointer;margin-top:8px;transition:background .2s,transform .1s;box-shadow:0 3px 12px rgba(15,110,86,0.22)}
+  .btn:hover{background:var(--ykr-dark)}
+  .btn:active{transform:translateY(1px)}
+  .err{color:#b91c1c;font-size:12px;margin-top:10px;text-align:center;display:none}
+  #result{display:none;margin-top:18px}
+  .result-head{text-align:center;margin-bottom:14px}
+  .result-head h2{font-size:17px;color:var(--ykr-dark);font-weight:700}
+  .bep-big{background:linear-gradient(160deg,var(--ykr) 0%,var(--ykr-dark) 100%);color:#fff;border-radius:var(--radius);padding:24px 20px;text-align:center;margin-bottom:14px}
+  .bep-big .label{font-size:13px;opacity:.9;margin-bottom:6px}
+  .bep-big .num{font-size:40px;font-weight:800;line-height:1.1}
+  .bep-big .num span{font-size:20px;font-weight:500}
+  .bep-big .sub{font-size:12px;opacity:.85;margin-top:8px}
+  .row-item{display:flex;justify-content:space-between;padding:11px 14px;background:var(--ivory);border-radius:8px;margin-bottom:8px;font-size:13px}
+  .row-item .k{color:var(--mid)}
+  .row-item .v{font-weight:700;color:var(--ink)}
+  .stair-warn{background:var(--warn-bg);border-radius:var(--radius-sm);padding:14px 15px;margin-top:6px;font-size:12.5px;color:var(--warn-tx);line-height:1.7}
+  .stair-warn b{font-weight:700}
+  .cta{margin-top:16px;background:linear-gradient(160deg,var(--ykr) 0%,var(--ykr-dark) 100%);color:#fff;border-radius:var(--radius);padding:22px 20px;text-align:center;box-shadow:0 6px 20px rgba(15,110,86,0.2)}
+  .cta h3{font-size:16px;font-weight:700;margin-bottom:9px;line-height:1.45}
+  .cta p{font-size:12.5px;opacity:.92;line-height:1.7;font-weight:300}
+  .cta a.beta{display:inline-block;margin-top:16px;background:#fff;color:var(--ykr-dark);text-decoration:none;font-weight:700;font-size:13.5px;padding:12px 28px;border-radius:50px;transition:transform .15s;box-shadow:0 3px 10px rgba(0,0,0,0.12)}
+  .cta a.beta:hover{transform:translateY(-2px)}
+  footer{max-width:480px;margin:22px auto 0;padding:0 22px;text-align:center}
+  footer p{font-size:10.5px;color:var(--light);line-height:1.7}
+  footer .disc{margin-top:7px;font-size:10px;color:#9aa3ad}
+</style>
+</head>
+<body>
+<div class="top">
+  <div class="brand">연규리에듀클리닉 · YKR edu·clinic</div>
+  <h1>우리 학원 손익분기 계산기</h1>
+  <p>원생 몇 명부터 남는지, 1분 만에 확인해보세요</p>
+</div>
+
+<div class="wrap">
+  <div class="card">
+    <div class="intro">
+      손익분기는 <b>"원생 몇 명부터 흑자인가"</b>를 보는 지점이에요. 아래 숫자를 넣으면 지금 비용 구조에서 본전 되는 원생 수가 나와요.
+      <div class="note-line">
+        정확하지 않아도 괜찮아요. 대략 넣어보는 것만으로 우리 학원이 <b>지금 어디쯤</b> 있는지 보입니다.
+      </div>
+    </div>
+  </div>
+
+  <div class="card">
+    <div class="card-title"><span class="n">1</span>우리 학원 숫자 입력</div>
+
+    <div class="field">
+      <label class="lbl">월 고정비 <span class="sub">임대료·관리비·기본급 등 (강사·차량 제외)</span></label>
+      <div class="inp-row"><input type="number" id="fixed" inputmode="numeric" placeholder="예: 500"><span class="unit">만원</span></div>
+    </div>
+
+    <div class="field">
+      <label class="lbl">월 계단형 비용 <span class="sub">현재 운영 중인 차량·강사·로열티 합계</span></label>
+      <div class="inp-row"><input type="number" id="step" inputmode="numeric" placeholder="예: 700"><span class="unit">만원</span></div>
+    </div>
+
+    <div class="field">
+      <label class="lbl">원생 1인당 평균 월 수강료</label>
+      <div class="inp-row"><input type="number" id="fee" inputmode="numeric" placeholder="예: 25"><span class="unit">만원</span></div>
+    </div>
+
+    <div class="field">
+      <label class="lbl">원생 1인당 변동비 <span class="sub">학원이 부담하는 교재·앱비 등 (별도로 받으면 0)</span></label>
+      <div class="inp-row"><input type="number" id="var" inputmode="numeric" placeholder="예: 0"><span class="unit">만원</span></div>
+    </div>
+
+    <button class="btn" onclick="calc()">손익분기 원생 수 계산하기</button>
+    <div class="err" id="err"></div>
+  </div>
+
+  <div id="result">
+    <div class="result-head"><h2>우리 학원 손익분기</h2></div>
+
+    <div class="bep-big">
+      <div class="label">본전 되는 원생 수</div>
+      <div class="num" id="bepNum">—</div>
+      <div class="sub" id="bepSub"></div>
+    </div>
+
+    <div class="row-item"><span class="k">원생 1명당 남는 돈 (공헌이익)</span><span class="v" id="cmVal">—</span></div>
+    <div class="row-item"><span class="k">월 고정비 + 계단형 비용</span><span class="v" id="totFixed">—</span></div>
+
+    <div class="stair-warn">
+      <b>⚠ 잠깐, 계단을 기억하세요.</b><br>
+      이 숫자는 <b>지금 비용 구조</b> 기준이에요. 원생이 늘어 <b>반을 하나 더 열거나 차를 한 대 더</b> 굴리면, 계단형 비용이 점프해서 손익분기선도 다시 위로 올라가요. "다음 계단이 몇 명에서 시작되는지"를 함께 살펴보세요.
+    </div>
+
+    <div class="cta">
+      <h3>우리 학원 비용 구조,<br>더 자세히 진단해볼까요?</h3>
+      <p>연규리에듀클리닉 경영 셀프진단은 고정비·인건비·수익 구조를 12개 항목으로 점검하고, 어디가 위험한지 맞춤 진단해드려요.</p>
+      <a class="beta" href="YOUR_BETA_FORM_LINK">진단 신청하기 →</a>
+    </div>
+  </div>
+</div>
+
+<footer>
+  <p>© 2026 연규리에듀클리닉. 본 계산기는 단순 추정 도구이며, 실제 경영 의사결정은 정밀 진단 및 전문가 상담을 권장합니다.</p>
+  <p class="disc">본 도구의 로직과 기준은 저작권 등록된 자산이며, 무단 복제·재배포를 금합니다.</p>
+</footer>
+
+<script>
+function won(n){ return Math.round(n).toLocaleString('ko-KR'); }
+function calc(){
+  var fixed = parseFloat(document.getElementById('fixed').value);
+  var step = parseFloat(document.getElementById('step').value);
+  var fee = parseFloat(document.getElementById('fee').value);
+  var vcost = parseFloat(document.getElementById('var').value);
+  var err = document.getElementById('err');
+
+  if(isNaN(vcost)) vcost = 0;
+  if(isNaN(fixed)||isNaN(step)||isNaN(fee)||fee<=0){
+    err.style.display='block';
+    err.textContent='고정비·계단형 비용·수강료를 정확히 입력해 주세요 (수강료는 0보다 커야 해요).';
+    return;
+  }
+  err.style.display='none';
+
+  var totalFixed = fixed + step;         // 만원
+  var cm = fee - vcost;                   // 1인당 공헌이익 (만원)
+  if(cm<=0){
+    err.style.display='block';
+    err.textContent='수강료가 1인당 변동비보다 커야 손익분기 계산이 가능해요.';
+    return;
+  }
+  var bep = Math.ceil(totalFixed / cm);   // 손익분기 원생 수
+
+  document.getElementById('bepNum').innerHTML = bep + '<span> 명</span>';
+  document.getElementById('bepSub').textContent = '이 인원을 넘으면 흑자로 전환됩니다 (지금 비용 구조 기준)';
+  document.getElementById('cmVal').textContent = won(cm) + '만원';
+  document.getElementById('totFixed').textContent = won(totalFixed) + '만원';
+
+  document.getElementById('result').style.display='block';
+  document.getElementById('result').scrollIntoView({behavior:'smooth', block:'start'});
+}
+</script>
+</body>
+</html>
