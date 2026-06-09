@@ -1,0 +1,192 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>학원 광고 효율 계산기 | 연규리에듀클리닉</title>
+<meta name="description" content="광고비로 원생 1명을 데려오는 비용(획득 단가)을 계산하고, 남는 장사인지 확인해보세요. 연규리에듀클리닉 학원 경영 클리닉.">
+<style>
+  :root{
+    --ykr:#0F6E56; --ykr-dark:#0a503f; --ykr-mid:#2d8a6e; --ykr-soft:#e6f2ed; --ykr-soft2:#f0f7f3;
+    --ivory:#f7f5f0; --ink:#16271d; --mid:#4a5568; --light:#7b8794; --line:#e3e0d8;
+    --warn-bg:#fef7c7; --warn-tx:#a16207; --warn-ac:#d4a017;
+    --good-bg:#e6f2ed; --good-tx:#0a503f;
+    --bad-bg:#fdecea; --bad-tx:#b91c1c;
+    --radius:14px; --radius-sm:9px; --shadow:0 2px 14px rgba(15,110,86,0.08);
+  }
+  *{box-sizing:border-box;margin:0;padding:0}
+  body{background:var(--ivory);color:var(--ink);font-family:'Noto Sans KR',sans-serif;font-size:14px;line-height:1.65;-webkit-font-smoothing:antialiased;min-height:100vh}
+  .wrap{max-width:480px;margin:0 auto;padding:0 16px 40px}
+  .top{background:linear-gradient(160deg,var(--ykr) 0%,var(--ykr-dark) 100%);color:#fff;padding:30px 20px 26px;text-align:center;border-radius:0 0 24px 24px;box-shadow:0 6px 22px rgba(15,110,86,0.18);position:relative;overflow:hidden}
+  .top::after{content:"";position:absolute;right:-40px;top:-40px;width:160px;height:160px;background:radial-gradient(circle,rgba(255,255,255,0.10),transparent 70%)}
+  .brand{font-size:11px;letter-spacing:2px;font-weight:500;opacity:.82;margin-bottom:8px;text-transform:uppercase}
+  .top h1{font-size:21px;font-weight:700;line-height:1.4;margin-bottom:7px}
+  .top p{font-size:12.5px;opacity:.9;font-weight:300}
+  .card{background:#fff;border-radius:var(--radius);box-shadow:var(--shadow);padding:20px;margin-top:16px}
+  .card-title{font-size:15px;font-weight:700;color:var(--ykr-dark);margin-bottom:14px;padding-bottom:10px;border-bottom:2px solid var(--ykr-soft);display:flex;align-items:center;gap:8px}
+  .card-title .n{background:var(--ykr);color:#fff;width:22px;height:22px;border-radius:6px;font-size:12px;font-weight:700;display:inline-flex;align-items:center;justify-content:center;flex:0 0 auto}
+  .intro{font-size:13px;color:var(--mid);line-height:1.75}
+  .intro b{color:var(--ykr-dark)}
+  .note-line{margin-top:12px;background:var(--ykr-soft2);border-left:3px solid var(--ykr-mid);border-radius:0 8px 8px 0;padding:10px 13px;font-size:12px;color:var(--ykr-dark);line-height:1.7}
+  .field{margin-bottom:15px}
+  .field:last-child{margin-bottom:0}
+  label.lbl{font-size:12.5px;font-weight:600;color:var(--mid);margin-bottom:6px;display:block}
+  label.lbl .sub{font-weight:400;color:var(--light);font-size:11px;margin-left:3px}
+  .inp-row{position:relative}
+  input[type=number],input[type=text]{width:100%;padding:11px 44px 11px 13px;border:1.5px solid #d8dde0;border-radius:var(--radius-sm);font-size:15px;font-family:'Noto Sans KR';color:var(--ink);background:#fff;transition:border .2s,box-shadow .2s;outline:none;-moz-appearance:textfield}
+  input[type=number]::-webkit-outer-spin-button,input[type=number]::-webkit-inner-spin-button{-webkit-appearance:none;margin:0}
+  input:focus{border-color:var(--ykr-mid);box-shadow:0 0 0 3px rgba(15,110,86,0.12)}
+  .unit{position:absolute;right:13px;top:50%;transform:translateY(-50%);font-size:12px;color:var(--light);pointer-events:none}
+  .btn{width:100%;background:var(--ykr);color:#fff;border:none;border-radius:var(--radius-sm);padding:14px;font-size:14.5px;font-weight:700;font-family:'Noto Sans KR';cursor:pointer;margin-top:8px;transition:background .2s,transform .1s;box-shadow:0 3px 12px rgba(15,110,86,0.22)}
+  .btn:hover{background:var(--ykr-dark)}
+  .btn:active{transform:translateY(1px)}
+  .err{color:#b91c1c;font-size:12px;margin-top:10px;text-align:center;display:none}
+  #result{display:none;margin-top:18px}
+  .result-head{text-align:center;margin-bottom:14px}
+  .result-head h2{font-size:17px;color:var(--ykr-dark);font-weight:700}
+  .cac-big{background:linear-gradient(160deg,var(--ykr) 0%,var(--ykr-dark) 100%);color:#fff;border-radius:var(--radius);padding:24px 20px;text-align:center;margin-bottom:14px}
+  .cac-big .label{font-size:13px;opacity:.9;margin-bottom:6px}
+  .cac-big .num{font-size:38px;font-weight:800;line-height:1.1}
+  .cac-big .num span{font-size:19px;font-weight:500}
+  .cac-big .sub{font-size:12px;opacity:.85;margin-top:8px}
+  .verdict{border-radius:var(--radius);padding:18px 18px;margin-bottom:14px;text-align:center;font-size:14px;line-height:1.7}
+  .verdict.good{background:var(--good-bg);color:var(--good-tx)}
+  .verdict.bad{background:var(--bad-bg);color:var(--bad-tx)}
+  .verdict .vt{font-size:16px;font-weight:800;display:block;margin-bottom:6px}
+  .row-item{display:flex;justify-content:space-between;padding:11px 14px;background:var(--ivory);border-radius:8px;margin-bottom:8px;font-size:13px}
+  .row-item .k{color:var(--mid)}
+  .row-item .v{font-weight:700;color:var(--ink)}
+  .tip{background:var(--warn-bg);border-radius:var(--radius-sm);padding:14px 15px;margin-top:6px;font-size:12.5px;color:var(--warn-tx);line-height:1.7}
+  .tip b{font-weight:700}
+  .cta{margin-top:16px;background:linear-gradient(160deg,var(--ykr) 0%,var(--ykr-dark) 100%);color:#fff;border-radius:var(--radius);padding:22px 20px;text-align:center;box-shadow:0 6px 20px rgba(15,110,86,0.2)}
+  .cta h3{font-size:16px;font-weight:700;margin-bottom:9px;line-height:1.45}
+  .cta p{font-size:12.5px;opacity:.92;line-height:1.7;font-weight:300}
+  .cta a.beta{display:inline-block;margin-top:16px;background:#fff;color:var(--ykr-dark);text-decoration:none;font-weight:700;font-size:13.5px;padding:12px 28px;border-radius:50px;transition:transform .15s;box-shadow:0 3px 10px rgba(0,0,0,0.12)}
+  .cta a.beta:hover{transform:translateY(-2px)}
+  footer{max-width:480px;margin:22px auto 0;padding:0 22px;text-align:center}
+  footer p{font-size:10.5px;color:var(--light);line-height:1.7}
+  footer .disc{margin-top:7px;font-size:10px;color:#9aa3ad}
+</style>
+</head>
+<body>
+<div class="top">
+  <div class="brand">연규리에듀클리닉 · YKR edu·clinic</div>
+  <h1>학원 광고 효율 계산기</h1>
+  <p>원생 1명 데려오는 비용, 남는 장사인지 1분 만에</p>
+</div>
+
+<div class="wrap">
+  <div class="card">
+    <div class="intro">
+      광고비는 비용이 아니라 <b>투자</b>예요. <b>원생 1명을 데려오는 데 든 돈(획득 단가)</b>을 구하고, 그게 원생 1명이 주는 이익보다 작은지 확인해보세요.
+      <div class="note-line">
+        채널별로 따로 넣어보세요. 전단지·소개·맘카페를 각각 계산하면 <b>어디가 효율적인지</b> 숫자로 드러납니다.
+      </div>
+    </div>
+  </div>
+
+  <div class="card">
+    <div class="card-title"><span class="n">1</span>광고 정보 입력</div>
+
+    <div class="field">
+      <label class="lbl">채널 이름 <span class="sub">예: 전단지 / 맘카페 / 소개</span></label>
+      <div class="inp-row"><input type="text" id="ch" placeholder="예: 전단지"></div>
+    </div>
+
+    <div class="field">
+      <label class="lbl">이 채널에 쓴 광고비 <span class="sub">쿠폰·경품·할인 비용 포함</span></label>
+      <div class="inp-row"><input type="number" id="spend" inputmode="numeric" placeholder="예: 50"><span class="unit">만원</span></div>
+    </div>
+
+    <div class="field">
+      <label class="lbl">그걸로 등록한 신규 원생 수</label>
+      <div class="inp-row"><input type="number" id="students" inputmode="numeric" placeholder="예: 2"><span class="unit">명</span></div>
+    </div>
+
+    <div class="field">
+      <label class="lbl">원생 1명당 월 공헌이익 <span class="sub">수강료에서 그 학생 변동비를 뺀 월 이익</span></label>
+      <div class="inp-row"><input type="number" id="cm" inputmode="numeric" placeholder="예: 20"><span class="unit">만원</span></div>
+    </div>
+
+    <button class="btn" onclick="calc()">광고 효율 계산하기</button>
+    <div class="err" id="err"></div>
+  </div>
+
+  <div id="result">
+    <div class="result-head"><h2 id="rhead">광고 효율 결과</h2></div>
+
+    <div class="cac-big">
+      <div class="label">원생 1명 데려온 비용 (획득 단가)</div>
+      <div class="num" id="cacNum">—</div>
+      <div class="sub" id="cacSub"></div>
+    </div>
+
+    <div class="verdict" id="verdict"><span class="vt" id="vt"></span><span id="vmsg"></span></div>
+
+    <div class="row-item"><span class="k">원생 1명당 월 공헌이익</span><span class="v" id="cmVal">—</span></div>
+    <div class="row-item"><span class="k">획득 단가 회수까지</span><span class="v" id="payback">—</span></div>
+
+    <div class="tip">
+      <b>💡 획득 단가는 "한 달 이익"이 아니라 "한 번 드는 비용"이에요.</b><br>
+      원생이 오래 다닐수록 그 한 번의 비용은 매달 이익으로 회수돼요. 그래서 <b>오래 다니는 원생을 데려오는 채널</b>(소개·입소문)이 진짜 효율적이에요.
+    </div>
+
+    <div class="cta">
+      <h3>우리 학원 비용·수익 구조,<br>더 자세히 진단해볼까요?</h3>
+      <p>연규리에듀클리닉 경영 셀프진단은 마케팅비를 포함한 비용 구조와 수익성을 12개 항목으로 점검해드려요.</p>
+      <a class="beta" href="YOUR_BETA_FORM_LINK">진단 신청하기 →</a>
+    </div>
+  </div>
+</div>
+
+<footer>
+  <p>© 2026 연규리에듀클리닉. 본 계산기는 단순 추정 도구이며, 실제 경영 의사결정은 정밀 진단 및 전문가 상담을 권장합니다.</p>
+  <p class="disc">본 도구의 로직과 기준은 저작권 등록된 자산이며, 무단 복제·재배포를 금합니다.</p>
+</footer>
+
+<script>
+function won(n){ return Math.round(n).toLocaleString('ko-KR'); }
+function calc(){
+  var ch = (document.getElementById('ch').value || '이 채널').trim();
+  var spend = parseFloat(document.getElementById('spend').value);
+  var students = parseFloat(document.getElementById('students').value);
+  var cm = parseFloat(document.getElementById('cm').value);
+  var err = document.getElementById('err');
+
+  if(isNaN(spend)||isNaN(students)||students<=0||isNaN(cm)||cm<=0){
+    err.style.display='block';
+    err.textContent='광고비·신규 원생 수·공헌이익을 정확히 입력해 주세요 (원생 수와 공헌이익은 0보다 커야 해요).';
+    return;
+  }
+  err.style.display='none';
+
+  var cac = spend / students;          // 획득 단가 (만원/명)
+  var payback = cac / cm;              // 회수까지 개월
+
+  document.getElementById('rhead').textContent = ch + ' 효율 결과';
+  document.getElementById('cacNum').innerHTML = won(cac) + '<span> 만원 / 명</span>';
+  document.getElementById('cacSub').textContent = ch + '(으)로 원생 1명을 데려오는 데 든 비용';
+  document.getElementById('cmVal').textContent = won(cm) + '만원 / 월';
+
+  var v = document.getElementById('verdict');
+  var vt = document.getElementById('vt');
+  var vmsg = document.getElementById('vmsg');
+
+  if(cac <= cm){
+    v.className = 'verdict good';
+    vt.textContent = '✓ 남는 장사예요';
+    vmsg.innerHTML = '획득 단가가 원생 1명의 한 달 이익보다 작아요. 한 달만 다녀도 광고비가 회수돼요.';
+    document.getElementById('payback').textContent = '약 ' + payback.toFixed(1) + '개월';
+  } else {
+    v.className = 'verdict bad';
+    vt.textContent = '주의가 필요해요';
+    vmsg.innerHTML = '획득 단가가 한 달 이익보다 커요. 원생이 <b>' + payback.toFixed(1) + '개월 이상</b> 다녀야 광고비가 회수돼요. 오래 다닐 채널인지 따져보세요.';
+    document.getElementById('payback').textContent = '약 ' + payback.toFixed(1) + '개월 (이익보다 큼)';
+  }
+
+  document.getElementById('result').style.display='block';
+  document.getElementById('result').scrollIntoView({behavior:'smooth', block:'start'});
+}
+</script>
+</body>
+</html>
