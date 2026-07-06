@@ -1,0 +1,427 @@
+<!--
+  ================================================================
+  저작물명  : 연규리에듀클리닉 영어학원 경영 간이진단 (맛보기)
+  용도      : 블로그 → 맛보기 진단 → 베타 신청 깔때기용 무료 모듈
+  저작자    : 연규리 (연규리에듀클리닉)
+  ----------------------------------------------------------------
+  © 2026 연규리에듀클리닉. All rights reserved.
+  본 맛보기 모듈에는 단순 비율 계산만 포함됩니다.
+  풀 버전의 진단 로직·기준·처방 매칭은 일절 포함하지 않습니다.
+  본 저작물은 한국저작권위원회에 컴퓨터프로그램저작물로
+  정식 등록(2026)되어 저작권법의 보호를 받습니다.
+  무단 복제·역공학·재배포를 금지합니다.
+  ================================================================
+-->
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>영어학원 경영 간이진단 맛보기 | 연규리에듀클리닉</title>
+
+<!-- ===== Open Graph (블로그 링크 카드용 / URL·이미지는 배포 후 실제 주소로 교체) ===== -->
+<meta property="og:title" content="영어학원 경영 간이진단 — 3가지 신호등으로 1분 점검">
+<meta property="og:description" content="월 매출·강사비·고정비만 입력하면 원장 수익·강사비·고정비를 신호등으로 점검합니다. 연규리에듀클리닉 무료 맛보기 진단.">
+<meta property="og:image" content="https://ykr-educlinic.netlify.app/matbogi/og-card.png">
+<meta property="og:url" content="https://ykr-educlinic.netlify.app/matbogi/">
+
+<link href="https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@300;400;500;600;700&family=Noto+Serif+KR:wght@400;600;700&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --ykr:#0F6E56;          /* 브랜드 메인 그린 */
+    --ykr-dark:#0a503f;
+    --ykr-mid:#2d8a6e;
+    --ykr-soft:#e6f2ed;
+    --ykr-soft2:#f0f7f3;
+    --ivory:#f7f5f0;
+    --ivory-dark:#edeae3;
+    --ink:#16271d;
+    --mid:#4a5568;
+    --light:#7b8794;
+    --line:#e3e0d8;
+    /* 신호등 */
+    --g-bg:#dcfce7; --g-tx:#15803d; --g-ac:#22a366;
+    --y-bg:#fef7c7; --y-tx:#a16207; --y-ac:#d4a017;
+    --r-bg:#fee2e2; --r-tx:#b91c1c; --r-ac:#e05252;
+    --radius:14px; --radius-sm:9px;
+    --shadow:0 2px 14px rgba(15,110,86,0.07);
+  }
+  *{box-sizing:border-box;margin:0;padding:0}
+  body{
+    background:var(--ivory);
+    color:var(--ink);
+    font-family:'Noto Sans KR',sans-serif;
+    font-size:14px;line-height:1.65;
+    -webkit-font-smoothing:antialiased;
+    padding:0 0 40px;
+    min-height:100vh;
+  }
+  .wrap{max-width:480px;margin:0 auto;padding:0 16px}
+
+  /* ===== 헤더 ===== */
+  .top{
+    background:linear-gradient(160deg,var(--ykr) 0%,var(--ykr-dark) 100%);
+    color:#fff;padding:30px 20px 26px;text-align:center;
+    border-radius:0 0 24px 24px;
+    box-shadow:0 6px 22px rgba(15,110,86,0.18);
+    position:relative;overflow:hidden;
+  }
+  .top::after{
+    content:"";position:absolute;right:-40px;top:-40px;width:160px;height:160px;
+    background:radial-gradient(circle,rgba(255,255,255,0.10),transparent 70%);
+  }
+  .brand{font-size:11px;letter-spacing:2px;font-weight:500;opacity:.82;margin-bottom:8px;text-transform:uppercase}
+  .top h1{font-family:'Noto Serif KR',serif;font-size:21px;font-weight:700;line-height:1.4;margin-bottom:7px}
+  .top p{font-size:12.5px;opacity:.9;font-weight:300}
+
+  /* ===== 카드 ===== */
+  .card{
+    background:#fff;border-radius:var(--radius);box-shadow:var(--shadow);
+    border:1px solid rgba(15,110,86,0.07);
+    padding:20px;margin-top:16px;
+  }
+  .card-title{
+    font-family:'Noto Serif KR',serif;font-size:15px;font-weight:700;color:var(--ykr-dark);
+    margin-bottom:14px;padding-bottom:10px;border-bottom:2px solid var(--ykr-soft);
+    display:flex;align-items:center;gap:8px;
+  }
+  .card-title .n{
+    background:var(--ykr);color:#fff;width:22px;height:22px;border-radius:6px;
+    font-family:'Noto Sans KR';font-size:12px;font-weight:700;
+    display:inline-flex;align-items:center;justify-content:center;flex:0 0 auto;
+  }
+
+  .intro{font-size:13px;color:var(--mid);line-height:1.75}
+  .intro b{color:var(--ykr-dark)}
+  .note-line{
+    margin-top:12px;background:var(--ykr-soft2);border-left:3px solid var(--ykr-mid);
+    border-radius:0 8px 8px 0;padding:10px 13px;font-size:12px;color:var(--ykr-dark);line-height:1.7;
+  }
+
+  /* ===== 입력 ===== */
+  .field{margin-bottom:15px}
+  .field:last-child{margin-bottom:0}
+  label.lbl{font-size:12.5px;font-weight:600;color:var(--mid);margin-bottom:6px;display:block}
+  label.lbl .sub{font-weight:400;color:var(--light);font-size:11px;margin-left:3px}
+  .inp-row{position:relative}
+  input[type=number]{
+    width:100%;padding:11px 44px 11px 13px;border:1.5px solid #d8dde0;border-radius:var(--radius-sm);
+    font-size:15px;font-family:'Noto Sans KR';color:var(--ink);background:#fff;
+    transition:border .2s,box-shadow .2s;outline:none;-moz-appearance:textfield;
+  }
+  input[type=number]::-webkit-outer-spin-button,
+  input[type=number]::-webkit-inner-spin-button{-webkit-appearance:none;margin:0}
+  input[type=number]:focus{border-color:var(--ykr-mid);box-shadow:0 0 0 3px rgba(15,110,86,0.12)}
+  .unit{position:absolute;right:13px;top:50%;transform:translateY(-50%);font-size:12px;color:var(--light);pointer-events:none}
+
+  /* ===== 약관 동의 ===== */
+  .terms{
+    margin-top:4px;display:flex;align-items:flex-start;gap:10px;
+    background:var(--ivory);border:1px solid var(--line);border-radius:var(--radius-sm);padding:13px;
+    cursor:pointer;user-select:none;
+  }
+  .terms input{margin-top:2px;width:17px;height:17px;accent-color:var(--ykr);flex:0 0 auto;cursor:pointer}
+  .terms span{font-size:11.5px;color:var(--mid);line-height:1.6}
+
+  /* ===== 버튼 ===== */
+  .btn{
+    width:100%;background:var(--ykr);color:#fff;border:none;border-radius:var(--radius-sm);
+    padding:14px;font-size:14.5px;font-weight:700;font-family:'Noto Sans KR';cursor:pointer;
+    margin-top:16px;transition:background .2s,transform .1s,box-shadow .2s;
+    box-shadow:0 3px 12px rgba(15,110,86,0.22);
+  }
+  .btn:hover{background:var(--ykr-dark)}
+  .btn:active{transform:translateY(1px)}
+  .err{color:var(--r-tx);font-size:12px;margin-top:10px;text-align:center;display:none}
+
+  /* ===== 결과 ===== */
+  #result{display:none;margin-top:18px}
+  .result-head{text-align:center;margin-bottom:4px}
+  .result-head h2{font-family:'Noto Serif KR',serif;font-size:17px;color:var(--ykr-dark);font-weight:700}
+  .result-head p{font-size:11.5px;color:var(--light);margin-top:3px}
+
+  .signal{
+    border-radius:var(--radius);padding:16px 16px 15px;margin-top:13px;
+    border:1px solid var(--line);background:#fff;position:relative;overflow:hidden;
+    opacity:0;transform:translateY(10px);animation:rise .5s forwards;
+  }
+  .signal::before{content:"";position:absolute;left:0;top:0;bottom:0;width:5px}
+  .signal.s-green::before{background:var(--g-ac)} 
+  .signal.s-yellow::before{background:var(--y-ac)}
+  .signal.s-red::before{background:var(--r-ac)}
+  @keyframes rise{to{opacity:1;transform:translateY(0)}}
+
+  .sig-top{display:flex;align-items:center;gap:11px;margin-bottom:9px}
+  .lamp{width:30px;height:30px;border-radius:50%;flex:0 0 auto;position:relative}
+  .signal.s-green .lamp{background:var(--g-ac);box-shadow:0 0 0 5px var(--g-bg)}
+  .signal.s-yellow .lamp{background:var(--y-ac);box-shadow:0 0 0 5px var(--y-bg)}
+  .signal.s-red .lamp{background:var(--r-ac);box-shadow:0 0 0 5px var(--r-bg)}
+  .lamp::after{content:"";position:absolute;inset:0;border-radius:50%;animation:pulse 2s infinite}
+  .signal.s-green .lamp::after{box-shadow:0 0 0 0 rgba(34,163,102,0.5)}
+  .signal.s-yellow .lamp::after{box-shadow:0 0 0 0 rgba(212,160,23,0.5)}
+  .signal.s-red .lamp::after{box-shadow:0 0 0 0 rgba(224,82,82,0.5)}
+  @keyframes pulse{70%{box-shadow:0 0 0 12px transparent}100%{box-shadow:0 0 0 0 transparent}}
+
+  .sig-name{font-family:'Noto Serif KR',serif;font-size:14.5px;font-weight:700;color:var(--ink);flex:1}
+  .sig-badge{font-size:11px;font-weight:700;padding:4px 10px;border-radius:50px}
+  .signal.s-green .sig-badge{background:var(--g-bg);color:var(--g-tx)}
+  .signal.s-yellow .sig-badge{background:var(--y-bg);color:var(--y-tx)}
+  .signal.s-red .sig-badge{background:var(--r-bg);color:var(--r-tx)}
+
+  .sig-val{font-size:13px;color:var(--mid);margin-bottom:8px}
+  .sig-val b{font-family:'Noto Serif KR',serif;font-size:18px;color:var(--ink)}
+  .sig-msg{font-size:12.5px;color:var(--mid);line-height:1.7}
+
+  .ref-box{
+    margin-top:14px;background:var(--ivory);border:1px dashed var(--line);
+    border-radius:var(--radius-sm);padding:13px 15px;font-size:12px;color:var(--mid);line-height:1.8;
+  }
+  .ref-box .rt{font-weight:700;color:var(--ykr-dark);font-size:12px;margin-bottom:4px;display:block}
+  .ref-box .hint{color:var(--y-tx);background:var(--y-bg);border-radius:6px;padding:8px 10px;margin-top:8px;display:block;font-size:11.5px}
+
+  /* ===== CTA ===== */
+  .cta{
+    margin-top:16px;background:linear-gradient(160deg,var(--ykr) 0%,var(--ykr-dark) 100%);
+    color:#fff;border-radius:var(--radius);padding:22px 20px;text-align:center;
+    box-shadow:0 6px 20px rgba(15,110,86,0.2);
+  }
+  .cta h3{font-family:'Noto Serif KR',serif;font-size:16px;font-weight:700;margin-bottom:9px;line-height:1.45}
+  .cta p{font-size:12.5px;opacity:.92;line-height:1.7;font-weight:300}
+  .cta a.beta{
+    display:inline-block;margin-top:16px;background:#fff;color:var(--ykr-dark);
+    text-decoration:none;font-weight:700;font-size:13.5px;padding:12px 28px;border-radius:50px;
+    transition:transform .15s;box-shadow:0 3px 10px rgba(0,0,0,0.12);
+  }
+  .cta a.beta:hover{transform:translateY(-2px)}
+  .cta small{display:block;margin-top:11px;font-size:10.5px;opacity:.7}
+
+  /* ===== 푸터 ===== */
+  footer{max-width:480px;margin:22px auto 0;padding:0 22px;text-align:center}
+  footer p{font-size:10.5px;color:var(--light);line-height:1.7}
+  footer .disc{margin-top:7px;font-size:10px;color:#9aa3ad}
+</style>
+</head>
+<body>
+
+  <header class="top">
+    <div class="brand">연규리에듀클리닉</div>
+    <h1>영어학원 경영 간이진단</h1>
+    <p>3가지 신호등으로 우리 학원을 1분 만에 점검해보세요</p>
+  </header>
+
+  <div class="wrap">
+
+    <!-- 안내 -->
+    <div class="card">
+      <p class="intro">
+        매달 정신없이 운영하다 보면 <b>지금 우리 학원이 건강한 구조인지</b> 한눈에 보기 어렵습니다.
+        아래 5가지만 입력하면 <b>원장 수익 · 강사비 · 고정비</b>를 신호등(🟢 건강 · 🟡 점검 · 🔴 주의)으로 보여드립니다.
+      </p>
+      <div class="note-line">
+        이 맛보기는 <b>신호등 점검까지</b> 보여드리는 무료 버전입니다.
+        12개 항목 정밀 진단과 맞춤 처방은 풀 버전에서 제공됩니다.
+      </div>
+    </div>
+
+    <!-- 입력 -->
+    <div class="card">
+      <div class="card-title"><span class="n">1</span>우리 학원 숫자 입력</div>
+
+      <div class="field">
+        <label class="lbl">월 매출 <span class="sub">(부가세 제외, 한 달 기준)</span></label>
+        <div class="inp-row"><input type="number" id="rev" inputmode="numeric" placeholder="예: 1800"><span class="unit">만원</span></div>
+      </div>
+
+      <div class="field">
+        <label class="lbl">강사비 합계 <span class="sub">(보조강사 포함, 원장 급여 제외)</span></label>
+        <div class="inp-row"><input type="number" id="sal" inputmode="numeric" placeholder="예: 700"><span class="unit">만원</span></div>
+      </div>
+
+      <div class="field">
+        <label class="lbl">고정비 합계 <span class="sub">(임대료·관리비·셔틀·공과금 등)</span></label>
+        <div class="inp-row"><input type="number" id="fix" inputmode="numeric" placeholder="예: 500"><span class="unit">만원</span></div>
+      </div>
+
+      <div class="field">
+        <label class="lbl">원장 직접수업 환산분 <span class="sub">(원장님이 직접 수업하는 월 합계 분)</span></label>
+        <div class="inp-row"><input type="number" id="dirmin" inputmode="numeric" placeholder="예: 1200"><span class="unit">분/월</span></div>
+      </div>
+
+      <div class="field">
+        <label class="lbl">현재 원생 수</label>
+        <div class="inp-row"><input type="number" id="stu" inputmode="numeric" placeholder="예: 55"><span class="unit">명</span></div>
+      </div>
+    </div>
+
+    <!-- 약관 + 버튼 -->
+    <div class="card">
+      <label class="terms">
+        <input type="checkbox" id="agree">
+        <span>본 진단 도구가 <b>한국저작권위원회 정식 등록 저작물(2026)</b>임을 확인하였으며, <b>무단 복제·역공학·재배포하지 않고</b> 본인 학원 진단 용도로만 사용하는 데 동의합니다.</span>
+      </label>
+      <button class="btn" id="run">신호등 진단 결과 보기</button>
+      <div class="err" id="err"></div>
+    </div>
+
+    <!-- 결과 -->
+    <div id="result">
+      <div class="card">
+        <div class="result-head">
+          <h2>우리 학원 신호등</h2>
+          <p>매출 대비 단순 비율 기준 · 참고용 간이 진단</p>
+        </div>
+        <div id="signals"></div>
+        <div class="ref-box" id="ref"></div>
+      </div>
+
+      <!-- 깔때기 CTA -->
+      <div class="cta">
+        <h3>여기까지가 “보여드릴 수 있는” 부분입니다</h3>
+        <p>
+          정밀 진단 <b>12개 항목</b>과 신호별 <b>맞춤 처방·개선 시나리오·실행 로드맵</b>은
+          현재 <b>베타 테스트 중</b>입니다. 한정 인원을 선별해 무료로 제공하며,
+          신청하신 원장님께 1주일 이내 개별 연락드립니다.
+        </p>
+        <a class="beta" href="https://docs.google.com/forms/d/e/1FAIpQLSfQv-S56LVo1zXJHMRYYvE-2jAzNN0mxAMqrm4xKU0x2FHPDA/viewform" target="_blank" rel="noopener">베타 우선 신청하기 →</a>
+        <small>한정 인원 선별 제공 · 신청서 작성 약 3분</small>
+      </div>
+    </div>
+
+  </div>
+
+  <footer>
+    <p>© 2026 연규리에듀클리닉. 본 진단 도구는 한국저작권위원회에 컴퓨터프로그램저작물로 정식 등록(2026)된 자산입니다. 무단 복제·역공학·재배포 시 저작권법에 따라 법적 책임을 물을 수 있습니다.</p>
+    <p class="disc">본 결과는 단순 비율에 기반한 참고용 간이 진단이며, 실제 경영 의사결정은 정밀 진단 및 전문가 상담을 권장합니다.</p>
+  </footer>
+
+<script>
+/* =========================================================
+   맛보기 진단 — 단순 비율 3종만 사용
+   (풀 버전의 가중치·처방 매칭·시나리오 로직 일절 미포함)
+   ========================================================= */
+(function(){
+  "use strict";
+
+  // ── 공개 기준선 (블로그 공개 수준) ──
+  var T_HEALTHY_LO = 35, T_HEALTHY_HI = 42, T_WARN_HI = 50; // 강사비(보조 포함) %
+  var F_HEALTHY = 30, F_WARN = 35;                          // 고정비 %
+  var M_HEALTHY = 20, M_WARN = 10;                          // 원장 수익률 %
+
+  function num(id){
+    var v = parseFloat(document.getElementById(id).value);
+    return (isNaN(v) || v < 0) ? 0 : v;
+  }
+  function r0(n){ return Math.round(n); }
+  function r1(n){ return (Math.round(n*10)/10); }
+
+  function makeSignal(name, cls, badge, valHtml, msg){
+    return '<div class="signal s-'+cls+'">' +
+      '<div class="sig-top">' +
+        '<div class="lamp"></div>' +
+        '<div class="sig-name">'+name+'</div>' +
+        '<div class="sig-badge">'+badge+'</div>' +
+      '</div>' +
+      (valHtml ? '<div class="sig-val">'+valHtml+'</div>' : '') +
+      '<div class="sig-msg">'+msg+'</div>' +
+    '</div>';
+  }
+
+  document.getElementById('run').addEventListener('click', function(){
+    var err = document.getElementById('err');
+    err.style.display = 'none';
+
+    var rev = num('rev'), sal = num('sal'), fix = num('fix');
+    var dirMin = num('dirmin'), stu = num('stu');
+
+    if(!document.getElementById('agree').checked){
+      err.textContent = '결과를 확인하시려면 이용 동의에 체크해주세요.';
+      err.style.display = 'block';
+      return;
+    }
+    if(rev <= 0){
+      err.textContent = '월 매출을 입력해주세요. (만원 단위)';
+      err.style.display = 'block';
+      return;
+    }
+
+    // ── 단순 비율 (단위는 비율 계산에서 상쇄됨) ──
+    var teacherRatio = sal / rev * 100;
+    var fixedRatio   = fix / rev * 100;
+    var profit       = rev - sal - fix;
+    var margin       = profit / rev * 100;
+
+    var html = '';
+    var delay = 0;
+
+    /* 1) 원장 수익률 */
+    (function(){
+      var cls, badge, msg;
+      if(margin >= M_HEALTHY){ cls='green'; badge='건강';
+        msg='매출의 약 '+r0(margin)+'%가 원장님 몫으로 남습니다. 수익 구조가 안정적입니다.';
+      } else if(margin >= M_WARN){ cls='yellow'; badge='점검 권장';
+        msg='수익은 나고 있지만 여유가 크지 않습니다. 비용 구조를 한 번 점검해볼 시점입니다.';
+      } else { cls='red'; badge='주의';
+        msg=(margin>=0 ? '원장님께 남는 몫이 매출의 약 '+r0(margin)+'%로 얇습니다. ' : '현재 매출보다 비용이 더 큰 구조입니다. ')+'비용 항목 점검이 필요합니다.';
+      }
+      html += makeSignal('원장 수익률', cls, badge,
+        '현재 <b>'+r1(margin)+'%</b> <span style="color:var(--light)">· 건강 기준 20% 이상</span>', msg);
+    })();
+
+    /* 2) 강사비 비율 */
+    (function(){
+      var cls, badge, msg;
+      if(teacherRatio < T_HEALTHY_LO){ cls='yellow'; badge='점검 권장';
+        msg='강사비 비중이 '+r0(teacherRatio)+'%로 낮은 편입니다. 원장님이 직접 수업으로 메우고 있지 않은지 점검해보세요.';
+      } else if(teacherRatio <= T_HEALTHY_HI){ cls='green'; badge='건강';
+        msg='강사비 비중이 적정 범위(35~42%) 안에 있습니다.';
+      } else if(teacherRatio <= T_WARN_HI){ cls='yellow'; badge='점검 권장';
+        msg='강사비 비중이 다소 높습니다('+r0(teacherRatio)+'%). 반 편성·강사 활용 효율을 점검해볼 수 있습니다.';
+      } else { cls='red'; badge='주의';
+        msg='강사비 비중이 '+r0(teacherRatio)+'%로 적정 상한을 넘습니다. 인건비 구조 점검이 필요합니다.';
+      }
+      html += makeSignal('강사비 비율', cls, badge,
+        '현재 <b>'+r1(teacherRatio)+'%</b> <span style="color:var(--light)">· 건강 기준 35~42%</span>', msg);
+    })();
+
+    /* 3) 고정비 비율 */
+    (function(){
+      var cls, badge, msg;
+      if(fixedRatio <= F_HEALTHY){ cls='green'; badge='건강';
+        msg='고정비 비중이 '+r0(fixedRatio)+'%로 안정적입니다. (목표 30% 이하)';
+      } else if(fixedRatio <= F_WARN){ cls='yellow'; badge='점검 권장';
+        msg='고정비 비중이 '+r0(fixedRatio)+'%입니다. 30% 이하를 목표로 임대료·운영비를 점검해보세요.';
+      } else { cls='red'; badge='주의';
+        msg='고정비 비중이 '+r0(fixedRatio)+'%로 높은 편입니다. 임대료 등 고정비 항목 점검이 필요합니다.';
+      }
+      html += makeSignal('고정비 비율', cls, badge,
+        '현재 <b>'+r1(fixedRatio)+'%</b> <span style="color:var(--light)">· 건강 기준 30% 이하</span>', msg);
+    })();
+
+    document.getElementById('signals').innerHTML = html;
+
+    // 신호등 카드 순차 등장
+    var cards = document.querySelectorAll('#signals .signal');
+    for(var i=0;i<cards.length;i++){ cards[i].style.animationDelay = (i*0.12)+'s'; }
+
+    /* 참고 정보 (정밀 계산 아님 — 단순 참고치) */
+    var ref = '<span class="rt">참고</span>';
+    if(stu > 0){
+      ref += '원생 ' + r0(stu) + '명 · 원생당 월 매출 약 <b>' + r1(rev/stu) + '만원</b><br>';
+    }
+    if(dirMin > 0){
+      ref += '원장님 직접수업 월 ' + r0(dirMin) + '분 (주당 약 ' + r0(dirMin/4.3) + '분)';
+    }
+    // 보이지 않는 인건비 힌트 (정직한 맥락 코멘트)
+    if(dirMin > 0 && teacherRatio < T_HEALTHY_LO){
+      ref += '<span class="hint">강사비 비중이 낮은데 원장님 직접수업이 많습니다. 강사 인건비를 원장님 노동으로 메우고 있을 수 있어, 겉으로 보이는 것보다 실제 부담이 클 수 있습니다.</span>';
+    }
+    document.getElementById('ref').innerHTML = ref;
+
+    var res = document.getElementById('result');
+    res.style.display = 'block';
+    res.scrollIntoView({behavior:'smooth', block:'start'});
+  });
+})();
+</script>
+</body>
+</html>

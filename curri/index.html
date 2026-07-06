@@ -1,0 +1,405 @@
+<!--
+  ================================================================
+  저작물명  : 연규리에듀클리닉 영어 커리큘럼 방향성 간이진단 (맛보기)
+  용도      : 블로그 → 맛보기 진단 → 베타 신청 깔때기용 무료 모듈
+  저작자    : 연규리 (연규리에듀클리닉)
+  ----------------------------------------------------------------
+  © 2026 연규리에듀클리닉. All rights reserved.
+  본 맛보기 모듈에는 4가지 유형 '개념'과 단순 신호등만 포함됩니다.
+  풀 버전의 유형 자동판별 알고리즘 · 커리큘럼유형(I/II/III) 판별 ·
+  처방 매칭 · 2차 심화 · 보고서 로직은 일절 포함하지 않습니다.
+  본 저작물은 한국저작권위원회에 컴퓨터프로그램저작물로
+  정식 등록(2026)되어 저작권법의 보호를 받습니다.
+  무단 복제·역공학·재배포를 금지합니다.
+  ================================================================
+-->
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>영어 커리큘럼 방향성 간이진단 맛보기 | 연규리에듀클리닉</title>
+
+<!-- ===== Open Graph (블로그 링크 카드용 / URL·이미지는 배포 후 실제 주소로 교체) ===== -->
+<meta property="og:title" content="영어 커리큘럼 방향성 간이진단 — 우리 학원은 어떤 유형?">
+<meta property="og:description" content="4가지 학습 질문이면 우리 학원 커리큘럼 유형과 방향성 정렬도를 신호등으로 점검할 수 있습니다. 연규리에듀클리닉 무료 맛보기 진단.">
+<meta property="og:image" content="https://ykr-educlinic.netlify.app/curri/og-card.png">
+<meta property="og:url" content="https://ykr-educlinic.netlify.app/curri/">
+
+<link href="https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@300;400;500;600;700&family=Noto+Serif+KR:wght@400;600;700&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --ykr:#0F6E56;          /* 브랜드 메인 그린 (맛보기 공통) */
+    --ykr-dark:#0a503f;
+    --ykr-mid:#2d8a6e;
+    --ykr-soft:#e6f2ed;
+    --ykr-soft2:#f0f7f3;
+    --ivory:#f7f5f0;
+    --ink:#16271d;
+    --mid:#4a5568;
+    --light:#7b8794;
+    --line:#e3e0d8;
+    /* 신호등 */
+    --g-bg:#dcfce7; --g-tx:#15803d; --g-ac:#22a366;
+    --y-bg:#fef7c7; --y-tx:#a16207; --y-ac:#d4a017;
+    --r-bg:#fee2e2; --r-tx:#b91c1c; --r-ac:#e05252;
+    --n-bg:#eef1f4; --n-tx:#64748b; --n-ac:#94a3b8;
+    /* 유형 액센트 (풀 버전 유형 색과 동일 계열) */
+    --tA:#0D9488; --tA-bg:#f0fdfa;
+    --tB:#DC2626; --tB-bg:#fef2f2;
+    --tAB:#7C3AED; --tAB-bg:#f5f3ff;
+    --tC:#D97706; --tC-bg:#fffbeb;
+    --radius:14px; --radius-sm:9px;
+    --shadow:0 2px 14px rgba(15,110,86,0.07);
+  }
+  *{box-sizing:border-box;margin:0;padding:0}
+  body{
+    background:var(--ivory);color:var(--ink);
+    font-family:'Noto Sans KR',sans-serif;font-size:14px;line-height:1.65;
+    -webkit-font-smoothing:antialiased;padding:0 0 40px;min-height:100vh;
+  }
+  .wrap{max-width:480px;margin:0 auto;padding:0 16px}
+
+  /* ===== 헤더 ===== */
+  .top{
+    background:linear-gradient(160deg,var(--ykr) 0%,var(--ykr-dark) 100%);
+    color:#fff;padding:30px 20px 26px;text-align:center;border-radius:0 0 24px 24px;
+    box-shadow:0 6px 22px rgba(15,110,86,0.18);position:relative;overflow:hidden;
+  }
+  .top::after{content:"";position:absolute;right:-40px;top:-40px;width:160px;height:160px;
+    background:radial-gradient(circle,rgba(255,255,255,0.10),transparent 70%)}
+  .brand{font-size:11px;letter-spacing:2px;font-weight:500;opacity:.82;margin-bottom:8px;text-transform:uppercase}
+  .top h1{font-family:'Noto Serif KR',serif;font-size:21px;font-weight:700;line-height:1.4;margin-bottom:7px}
+  .top p{font-size:12.5px;opacity:.9;font-weight:300}
+
+  /* ===== 카드 ===== */
+  .card{background:#fff;border-radius:var(--radius);box-shadow:var(--shadow);
+    border:1px solid rgba(15,110,86,0.07);padding:20px;margin-top:16px}
+  .card-title{font-family:'Noto Serif KR',serif;font-size:15px;font-weight:700;color:var(--ykr-dark);
+    margin-bottom:14px;padding-bottom:10px;border-bottom:2px solid var(--ykr-soft);
+    display:flex;align-items:center;gap:8px}
+  .card-title .n{background:var(--ykr);color:#fff;width:22px;height:22px;border-radius:6px;
+    font-size:12px;font-weight:700;display:inline-flex;align-items:center;justify-content:center;flex:0 0 auto}
+
+  .intro{font-size:13px;color:var(--mid);line-height:1.75}
+  .intro b{color:var(--ykr-dark)}
+  .note-line{margin-top:12px;background:var(--ykr-soft2);border-left:3px solid var(--ykr-mid);
+    border-radius:0 8px 8px 0;padding:10px 13px;font-size:12px;color:var(--ykr-dark);line-height:1.7}
+
+  /* ===== 문항 ===== */
+  .q{margin-bottom:22px}
+  .q:last-of-type{margin-bottom:0}
+  .q-h{font-size:13.5px;font-weight:700;color:var(--ink);margin-bottom:11px;line-height:1.55}
+  .q-h .qn{color:var(--ykr);font-family:'Noto Serif KR',serif;margin-right:5px}
+  .opt{
+    display:flex;align-items:center;gap:10px;border:1.5px solid #e1e5e8;border-radius:var(--radius-sm);
+    padding:11px 13px;margin-bottom:8px;cursor:pointer;transition:all .15s;background:#fff;font-size:12.5px;color:var(--mid);
+  }
+  .opt:last-child{margin-bottom:0}
+  .opt:hover{border-color:var(--ykr-mid);background:var(--ykr-soft2)}
+  .opt input{display:none}
+  .opt .dot{width:18px;height:18px;border-radius:50%;border:2px solid #cbd2d8;flex:0 0 auto;transition:all .15s;position:relative}
+  .opt.sel{border-color:var(--ykr);background:var(--ykr-soft);color:var(--ink);font-weight:500}
+  .opt.sel .dot{border-color:var(--ykr);background:var(--ykr)}
+  .opt.sel .dot::after{content:"";position:absolute;inset:4px;background:#fff;border-radius:50%}
+
+  /* ===== 약관 + 버튼 ===== */
+  .terms{margin-top:4px;display:flex;align-items:flex-start;gap:10px;background:var(--ivory);
+    border:1px solid var(--line);border-radius:var(--radius-sm);padding:13px;cursor:pointer;user-select:none}
+  .terms input{margin-top:2px;width:17px;height:17px;accent-color:var(--ykr);flex:0 0 auto;cursor:pointer}
+  .terms span{font-size:11.5px;color:var(--mid);line-height:1.6}
+  .btn{width:100%;background:var(--ykr);color:#fff;border:none;border-radius:var(--radius-sm);
+    padding:14px;font-size:14.5px;font-weight:700;font-family:'Noto Sans KR';cursor:pointer;margin-top:16px;
+    transition:background .2s,transform .1s;box-shadow:0 3px 12px rgba(15,110,86,0.22)}
+  .btn:hover{background:var(--ykr-dark)}
+  .btn:active{transform:translateY(1px)}
+  .err{color:var(--r-tx);font-size:12px;margin-top:10px;text-align:center;display:none}
+
+  /* ===== 결과 ===== */
+  #result{display:none;margin-top:18px}
+  .result-head{text-align:center;margin-bottom:6px}
+  .result-head h2{font-family:'Noto Serif KR',serif;font-size:17px;color:var(--ykr-dark);font-weight:700}
+  .result-head p{font-size:11.5px;color:var(--light);margin-top:3px}
+
+  /* 유형 배지 카드 */
+  .type-card{border-radius:var(--radius);padding:18px;margin-top:12px;border:1px solid var(--line);
+    background:#fff;position:relative;overflow:hidden;opacity:0;transform:translateY(10px);animation:rise .5s forwards}
+  .type-card::before{content:"";position:absolute;left:0;top:0;bottom:0;width:5px;background:var(--tac,var(--ykr))}
+  .type-lbl{font-size:11px;font-weight:700;letter-spacing:.1em;color:var(--tac,var(--ykr));margin-bottom:5px}
+  .type-name{font-family:'Noto Serif KR',serif;font-size:18px;font-weight:700;color:var(--ink);margin-bottom:8px}
+  .type-desc{font-size:12.5px;color:var(--mid);line-height:1.7}
+  @keyframes rise{to{opacity:1;transform:translateY(0)}}
+
+  .sig-title{font-size:11px;font-weight:700;letter-spacing:.05em;color:var(--light);
+    margin:20px 0 2px;text-transform:uppercase}
+  .signal{border-radius:var(--radius-sm);padding:14px 15px;margin-top:11px;border:1px solid var(--line);
+    background:#fff;position:relative;overflow:hidden;opacity:0;transform:translateY(10px);animation:rise .5s forwards}
+  .signal::before{content:"";position:absolute;left:0;top:0;bottom:0;width:5px}
+  .signal.s-green::before{background:var(--g-ac)}
+  .signal.s-yellow::before{background:var(--y-ac)}
+  .signal.s-red::before{background:var(--r-ac)}
+  .signal.s-neutral::before{background:var(--n-ac)}
+  .sig-top{display:flex;align-items:center;gap:10px;margin-bottom:7px}
+  .lamp{width:26px;height:26px;border-radius:50%;flex:0 0 auto}
+  .signal.s-green .lamp{background:var(--g-ac);box-shadow:0 0 0 5px var(--g-bg)}
+  .signal.s-yellow .lamp{background:var(--y-ac);box-shadow:0 0 0 5px var(--y-bg)}
+  .signal.s-red .lamp{background:var(--r-ac);box-shadow:0 0 0 5px var(--r-bg)}
+  .signal.s-neutral .lamp{background:var(--n-ac);box-shadow:0 0 0 5px var(--n-bg)}
+  .sig-name{font-family:'Noto Serif KR',serif;font-size:14px;font-weight:700;color:var(--ink);flex:1}
+  .sig-badge{font-size:11px;font-weight:700;padding:4px 10px;border-radius:50px}
+  .signal.s-green .sig-badge{background:var(--g-bg);color:var(--g-tx)}
+  .signal.s-yellow .sig-badge{background:var(--y-bg);color:var(--y-tx)}
+  .signal.s-red .sig-badge{background:var(--r-bg);color:var(--r-tx)}
+  .signal.s-neutral .sig-badge{background:var(--n-bg);color:var(--n-tx)}
+  .sig-msg{font-size:12.5px;color:var(--mid);line-height:1.7}
+
+  .ref-box{margin-top:14px;background:var(--ivory);border:1px dashed var(--line);
+    border-radius:var(--radius-sm);padding:12px 14px;font-size:11.5px;color:var(--light);line-height:1.7}
+
+  /* ===== CTA ===== */
+  .cta{margin-top:16px;background:linear-gradient(160deg,var(--ykr) 0%,var(--ykr-dark) 100%);
+    color:#fff;border-radius:var(--radius);padding:22px 20px;text-align:center;box-shadow:0 6px 20px rgba(15,110,86,0.2)}
+  .cta h3{font-family:'Noto Serif KR',serif;font-size:16px;font-weight:700;margin-bottom:9px;line-height:1.45}
+  .cta p{font-size:12.5px;opacity:.92;line-height:1.7;font-weight:300}
+  .cta a.beta{display:inline-block;margin-top:16px;background:#fff;color:var(--ykr-dark);text-decoration:none;
+    font-weight:700;font-size:13.5px;padding:12px 28px;border-radius:50px;transition:transform .15s;box-shadow:0 3px 10px rgba(0,0,0,0.12)}
+  .cta a.beta:hover{transform:translateY(-2px)}
+  .cta small{display:block;margin-top:11px;font-size:10.5px;opacity:.7}
+
+  /* ===== 푸터 ===== */
+  footer{max-width:480px;margin:22px auto 0;padding:0 22px;text-align:center}
+  footer p{font-size:10.5px;color:var(--light);line-height:1.7}
+  footer .disc{margin-top:7px;font-size:10px;color:#9aa3ad}
+</style>
+</head>
+<body>
+
+  <header class="top">
+    <div class="brand">연규리에듀클리닉</div>
+    <h1>커리큘럼 방향성 간이진단</h1>
+    <p>4가지 질문으로 우리 학원 커리큘럼 유형과 방향성을 점검합니다</p>
+  </header>
+
+  <div class="wrap">
+
+    <!-- 안내 -->
+    <div class="card">
+      <p class="intro">
+        커리큘럼 문제는 보통 <b>"무엇을 가르치는가"가 아니라 "방향이 정렬되어 있는가"</b>에서 시작됩니다.
+        아래 4가지 질문에 답하면 우리 학원이 <b>4가지 유형 중 어디에 가까운지</b>와
+        <b>방향성 정렬 신호등 3종</b>을 보여드립니다.
+      </p>
+      <div class="note-line">
+        이 맛보기는 <b>유형 추정 + 정렬 신호등까지</b> 보여드리는 무료 버전입니다.
+        유형별 심화 진단·커리큘럼 완성도 판별·맞춤 처방은 풀 버전에서 제공됩니다.
+      </div>
+    </div>
+
+    <!-- 문항 -->
+    <div class="card">
+      <div class="card-title"><span class="n">?</span>우리 학원 커리큘럼 체크</div>
+
+      <!-- Q1 — 유형 자가 식별 -->
+      <div class="q" data-q="q1">
+        <div class="q-h"><span class="qn">Q1.</span>우리 학원이 가르치는 영어는 어느 쪽에 더 가깝나요?</div>
+        <label class="opt"><input type="radio" name="q1" value="0"><span class="dot"></span><span>영어를 언어로 익히게 하는 것 (말하기·듣기·표현 중심)</span></label>
+        <label class="opt"><input type="radio" name="q1" value="1"><span class="dot"></span><span>시험·내신을 잘 보게 하는 것 (문법·독해·점수 중심)</span></label>
+        <label class="opt"><input type="radio" name="q1" value="2"><span class="dot"></span><span>둘 다 — 연령·레벨에 따라 나눠서 운영한다</span></label>
+        <label class="opt"><input type="radio" name="q1" value="3"><span class="dot"></span><span>정해진 방향이 뚜렷하지 않다</span></label>
+      </div>
+
+      <!-- Q2 — 방향 명확도 -->
+      <div class="q" data-q="q2">
+        <div class="q-h"><span class="qn">Q2.</span>"여기는 어떤 영어를 가르치나요?" 학부모 질문에 어떻게 답하시나요?</div>
+        <label class="opt"><input type="radio" name="q2" value="0"><span class="dot"></span><span>한 문장으로 즉시 명확하게 설명한다</span></label>
+        <label class="opt"><input type="radio" name="q2" value="1"><span class="dot"></span><span>설명은 하지만 매번 조금씩 다르게 말한다</span></label>
+        <label class="opt"><input type="radio" name="q2" value="2"><span class="dot"></span><span>"둘 다 한다"고 다소 애매하게 답한다</span></label>
+        <label class="opt"><input type="radio" name="q2" value="3"><span class="dot"></span><span>질문 자체가 답하기 어렵게 느껴진다</span></label>
+      </div>
+
+      <!-- Q3 — 교사 간 일관성 -->
+      <div class="q" data-q="q3">
+        <div class="q-h"><span class="qn">Q3.</span>교사마다 수업 방식이 많이 다른 편인가요?</div>
+        <label class="opt"><input type="radio" name="q3" value="0"><span class="dot"></span><span>커리큘럼대로 거의 비슷하게 진행된다</span></label>
+        <label class="opt"><input type="radio" name="q3" value="1"><span class="dot"></span><span>스타일 차이는 있지만 방향은 같다</span></label>
+        <label class="opt"><input type="radio" name="q3" value="2"><span class="dot"></span><span>교사에 따라 수업 내용이 꽤 달라진다</span></label>
+        <label class="opt"><input type="radio" name="q3" value="3"><span class="dot"></span><span>사실상 교사별로 다른 수업이 진행된다</span></label>
+      </div>
+
+      <!-- Q4 — 연령 전환 설계 -->
+      <div class="q" data-q="q4">
+        <div class="q-h"><span class="qn">Q4.</span>초등 5~6학년 대상 수업은 어떻게 운영되나요?</div>
+        <label class="opt"><input type="radio" name="q4" value="0"><span class="dot"></span><span>저학년과 동일하게 언어 습득 중심으로 진행</span></label>
+        <label class="opt"><input type="radio" name="q4" value="1"><span class="dot"></span><span>문법·독해 비중이 늘지만 명확한 기준은 없다</span></label>
+        <label class="opt"><input type="radio" name="q4" value="2"><span class="dot"></span><span>별도 커리큘럼으로 시험 대비 중심 전환</span></label>
+        <label class="opt"><input type="radio" name="q4" value="3"><span class="dot"></span><span>해당 연령 학생이 없다</span></label>
+      </div>
+    </div>
+
+    <!-- 약관 + 버튼 -->
+    <div class="card">
+      <label class="terms">
+        <input type="checkbox" id="agree">
+        <span>본 진단 도구가 <b>한국저작권위원회 정식 등록 저작물(2026)</b>임을 확인하였으며, <b>무단 복제·역공학·재배포하지 않고</b> 본인 학원 진단 용도로만 사용하는 데 동의합니다.</span>
+      </label>
+      <button class="btn" id="run">유형 · 신호등 결과 보기</button>
+      <div class="err" id="err"></div>
+    </div>
+
+    <!-- 결과 -->
+    <div id="result">
+      <div class="card">
+        <div class="result-head">
+          <h2>우리 학원 커리큘럼 진단</h2>
+          <p>자가 응답 기반 · 참고용 간이 진단</p>
+        </div>
+
+        <div id="typeBox"></div>
+
+        <div class="sig-title">방향성 정렬 신호등</div>
+        <div id="signals"></div>
+
+        <div class="ref-box" id="ref"></div>
+      </div>
+
+      <!-- 깔때기 CTA -->
+      <div class="cta">
+        <h3>여기까지가 “보여드릴 수 있는” 부분입니다</h3>
+        <p>
+          유형별 <b>심화 진단</b>, 커리큘럼 완성도(<b>고도화 / 신규 구축 / 적용 문제</b>) 판별,
+          그리고 신호별 <b>맞춤 처방·보고서</b>는 현재 <b>베타 테스트 중</b>입니다.
+          한정 인원을 선별해 무료로 제공하며, 신청하신 원장님께 1주일 이내 개별 연락드립니다.
+        </p>
+        <a class="beta" href="https://docs.google.com/forms/d/e/1FAIpQLSfQv-S56LVo1zXJHMRYYvE-2jAzNN0mxAMqrm4xKU0x2FHPDA/viewform" target="_blank" rel="noopener">베타 우선 신청하기 →</a>
+        <small>한정 인원 선별 제공 · 신청서 작성 약 3분</small>
+      </div>
+    </div>
+
+  </div>
+
+  <footer>
+    <p>© 2026 연규리에듀클리닉. 본 진단 도구는 한국저작권위원회에 컴퓨터프로그램저작물로 정식 등록(2026)된 자산입니다. 무단 복제·역공학·재배포 시 저작권법에 따라 법적 책임을 물을 수 있습니다.</p>
+    <p class="disc">본 결과는 자가 응답에 기반한 참고용 간이 진단이며, 정밀 진단 및 전문가 상담을 권장합니다.</p>
+  </footer>
+
+<script>
+/* =========================================================
+   커리큘럼 맛보기 — 유형 '개념' + 단순 신호등만 사용
+   (풀 버전의 유형 자동판별 가중치 · 커리큘럼유형 I/II/III 판별 ·
+    처방 매칭 로직은 일절 미포함. 문항당 1:1 투명 매핑만.)
+   ========================================================= */
+(function(){
+  "use strict";
+
+  // ── 4가지 유형 개념 (공개 수준 설명) ──
+  var TYPES = {
+    A:  {lbl:'TYPE A', name:'언어 습득형', accent:'var(--tA)',
+         desc:'말하기·듣기·표현을 중심으로 영어를 언어로 익히게 하는 방향입니다. 몰입식·화상영어·유아 영어 계열이 여기에 가깝습니다.'},
+    B:  {lbl:'TYPE B', name:'학습·시험 대비형', accent:'var(--tB)',
+         desc:'문법·독해·내신을 중심으로 시험 성과를 만드는 방향입니다. 중등 내신 전문 학원 계열이 여기에 가깝습니다.'},
+    AB: {lbl:'TYPE AB', name:'이중 트랙형', accent:'var(--tAB)',
+         desc:'저학년은 언어 습득, 고학년은 시험 대비로 트랙을 나눠 운영하는 구조입니다. 두 트랙의 연결 설계가 핵심 과제입니다.'},
+    C:  {lbl:'TYPE C', name:'방향 미설정형', accent:'var(--tC)',
+         desc:'교육 방향이 아직 또렷하게 정리되지 않았거나 학원 안에 혼재된 상태입니다. 진단보다 먼저 방향 정리가 필요한 단계입니다.'}
+  };
+
+  // 라디오 카드 선택 UI
+  document.querySelectorAll('.opt').forEach(function(opt){
+    opt.addEventListener('click', function(){
+      var name = opt.querySelector('input').name;
+      document.querySelectorAll('.opt input[name="'+name+'"]').forEach(function(i){
+        i.closest('.opt').classList.remove('sel');
+      });
+      opt.classList.add('sel');
+      opt.querySelector('input').checked = true;
+    });
+  });
+
+  function val(name){
+    var el = document.querySelector('input[name="'+name+'"]:checked');
+    return el ? parseInt(el.value,10) : null;
+  }
+
+  function makeSignal(name, cls, badge, msg){
+    return '<div class="signal s-'+cls+'">' +
+      '<div class="sig-top"><div class="lamp"></div>' +
+      '<div class="sig-name">'+name+'</div>' +
+      '<div class="sig-badge">'+badge+'</div></div>' +
+      '<div class="sig-msg">'+msg+'</div></div>';
+  }
+
+  document.getElementById('run').addEventListener('click', function(){
+    var err = document.getElementById('err');
+    err.style.display = 'none';
+
+    var q1=val('q1'), q2=val('q2'), q3=val('q3'), q4=val('q4');
+
+    if(!document.getElementById('agree').checked){
+      err.textContent = '결과를 확인하시려면 이용 동의에 체크해주세요.';
+      err.style.display='block'; return;
+    }
+    if(q1===null||q2===null||q3===null||q4===null){
+      err.textContent = '4가지 질문에 모두 답해주세요.';
+      err.style.display='block'; return;
+    }
+
+    /* 유형 — Q1 응답을 그대로 매핑 (투명 / 가중치 없음) */
+    var key = (q1===0)?'A':(q1===1)?'B':(q1===2)?'AB':'C';
+    var t = TYPES[key];
+    document.getElementById('typeBox').innerHTML =
+      '<div class="type-card" style="--tac:'+t.accent+'">' +
+        '<div class="type-lbl">'+t.lbl+'</div>' +
+        '<div class="type-name">'+t.name+'</div>' +
+        '<div class="type-desc">'+t.desc+'</div>' +
+      '</div>';
+
+    var html = '';
+
+    /* 신호등 1 — 방향 명확도 (Q2 단순 매핑) */
+    (function(){
+      var cls, badge, msg;
+      if(q2===0){ cls='green'; badge='건강'; msg='학원의 교육 방향을 한 문장으로 설명할 수 있다면, 커리큘럼·상담·마케팅이 한 방향으로 정렬되기 쉽습니다.'; }
+      else if(q2===3){ cls='red'; badge='주의'; msg='방향을 설명하기 어렵다는 것은 커리큘럼의 기준점이 아직 없다는 신호일 수 있습니다. 방향 정리부터 권합니다.'; }
+      else { cls='yellow'; badge='점검 권장'; msg='방향이 있긴 하지만 매번 설명이 달라진다면, 학부모에게 전달되는 메시지도 흔들립니다. 한 문장으로 정리해볼 시점입니다.'; }
+      html += makeSignal('방향 명확도', cls, badge, msg);
+    })();
+
+    /* 신호등 2 — 교사 간 일관성 (Q3 단순 매핑) */
+    (function(){
+      var cls, badge, msg;
+      if(q3<=1){ cls='green'; badge='건강'; msg='교사 간 방향이 일치한다면 학생 경험의 편차가 작아, 커리큘럼이 의도대로 작동하고 있을 가능성이 큽니다.'; }
+      else if(q3===2){ cls='yellow'; badge='점검 권장'; msg='교사에 따라 수업 내용이 달라진다면, 같은 학원 안에서 다른 학습 경험이 만들어지고 있을 수 있습니다.'; }
+      else { cls='red'; badge='주의'; msg='사실상 교사별로 다른 수업이 진행된다면, 커리큘럼이 문서로만 존재하고 현장 적용이 안 되는 상태일 수 있습니다.'; }
+      html += makeSignal('교사 간 일관성', cls, badge, msg);
+    })();
+
+    /* 신호등 3 — 연령 전환 설계 (Q4 단순 매핑) */
+    (function(){
+      var cls, badge, msg;
+      if(q4===2){ cls='green'; badge='건강'; msg='고학년 전환이 별도 커리큘럼으로 설계되어 있다면, 연령에 따른 학습 목표 변화가 관리되고 있는 것입니다.'; }
+      else if(q4===3){ cls='neutral'; badge='해당 없음'; msg='해당 연령 학생이 없어 이 항목은 평가하지 않았습니다. 향후 연령대가 확장될 때 다시 점검해보세요.'; }
+      else if(q4===1){ cls='yellow'; badge='점검 권장'; msg='고학년에서 시험 비중은 늘지만 명확한 기준이 없다면, 전환 지점에서 학생·학부모 혼선이 생기기 쉽습니다.'; }
+      else { cls='yellow'; badge='점검 권장'; msg='고학년도 저학년과 동일하게 운영 중이라면, 연령 변화에 맞춘 목표 전환이 설계되어 있는지 점검해보세요.'; }
+      html += makeSignal('연령 전환 설계', cls, badge, msg);
+    })();
+
+    document.getElementById('signals').innerHTML = html;
+
+    // 카드 순차 등장
+    var cards = document.querySelectorAll('#result .type-card, #result .signal');
+    for(var i=0;i<cards.length;i++){ cards[i].style.animationDelay = (i*0.1)+'s'; }
+
+    var refMsg = '유형은 입력하신 방향(Q1)을 기준으로 한 <b>추정</b>이며, 풀 버전에서는 7개 스크리닝 문항으로 더 정밀하게 판별합니다.';
+    if(key==='C'){
+      refMsg = '방향 미설정 상태에서는 신호등보다 <b>방향 정리</b>가 먼저입니다. 이 단계에서 정밀 진단이 오히려 큰 도움이 됩니다.';
+    }
+    document.getElementById('ref').innerHTML = refMsg;
+
+    var res = document.getElementById('result');
+    res.style.display='block';
+    res.scrollIntoView({behavior:'smooth', block:'start'});
+  });
+})();
+</script>
+</body>
+</html>
